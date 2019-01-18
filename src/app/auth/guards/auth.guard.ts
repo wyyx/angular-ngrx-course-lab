@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core'
 import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot, Router } from '@angular/router'
 import { Store } from '@ngrx/store'
-import { AppState } from '../store'
-import { getLoggedIn } from './store/selectors/auth.selectors'
+import { AppState } from '../../store'
+import { getLoggedIn } from '../store/selectors/auth.selectors'
 import { tap } from 'rxjs/operators'
 
 @Injectable({ providedIn: 'root' })

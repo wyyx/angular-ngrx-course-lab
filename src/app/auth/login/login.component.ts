@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms'
 
 import { Store } from '@ngrx/store'
 
-import { AuthService } from '../auth.service'
+import { AuthService } from '../services/auth.service'
 import { tap } from 'rxjs/operators'
 import { noop, Subject } from 'rxjs'
 import { Router } from '@angular/router'

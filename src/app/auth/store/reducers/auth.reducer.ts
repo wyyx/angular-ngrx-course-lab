@@ -31,5 +31,3 @@ export function authReducer(state = initialAuthState, action: AuthActions): Auth
       break
   }
 }
-
-export const getAuthState = createFeatureSelector<AuthState>('auth')
