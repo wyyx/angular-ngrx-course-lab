@@ -1,60 +1,68 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute} from "@angular/router";
-import {MatPaginator, MatTableDataSource} from "@angular/material";
-import {Course} from "../model/course";
-import {CoursesService} from "../services/courses.service";
-import {debounceTime, distinctUntilChanged, startWith, tap, delay} from 'rxjs/operators';
-import {merge, fromEvent} from "rxjs";
-import {LessonsDataSource} from "../services/lessons.datasource";
-
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, OnDestroy } from '@angular/core'
+import { ActivatedRoute } from '@angular/router'
+import { MatPaginator, MatTableDataSource } from '@angular/material'
+import { Course } from '../model/course'
+import { CoursesService } from '../services/courses.service'
+import {
+  debounceTime,
+  distinctUntilChanged,
+  startWith,
+  tap,
+  delay,
+  takeUntil
+} from 'rxjs/operators'
+import { merge, fromEvent, Observable, Subject } from 'rxjs'
+import { LessonsDataSource } from '../services/lessons.datasource'
+import { Store } from '@ngrx/store'
+import { AppState } from '../../store'
+import { getCourseById } from '../store/selectors/courses.selectors'
+import { LoadCourseAction } from '../store/actions/courses.actions'
 
 @Component({
-    selector: 'course',
-    templateUrl: './course.component.html',
-    styleUrls: ['./course.component.css']
+  selector: 'course',
+  templateUrl: './course.component.html',
+  styleUrls: ['./course.component.css']
 })
-export class CourseComponent implements OnInit, AfterViewInit {
+export class CourseComponent implements OnInit, AfterViewInit, OnDestroy {
+  course: Course = null
+  dataSource: LessonsDataSource
+  displayedColumns = ['seqNo', 'description', 'duration']
+  courseId: number
 
-    course:Course;
+  kill$: Subject<any> = new Subject()
 
-    dataSource: LessonsDataSource;
+  @ViewChild(MatPaginator) paginator: MatPaginator
 
-    displayedColumns= ["seqNo", "description", "duration"];
+  constructor(
+    private route: ActivatedRoute,
+    private coursesService: CoursesService,
+    private store: Store<AppState>
+  ) {}
 
-    @ViewChild(MatPaginator) paginator: MatPaginator;
+  ngOnInit() {
+    this.courseId = parseInt(this.route.snapshot.paramMap.get('id'))
 
+    this.store
+      .select(getCourseById(this.courseId))
+      .pipe(takeUntil(this.kill$))
+      .subscribe((course) => (this.course = course))
 
-    constructor(private route: ActivatedRoute,
-                private coursesService: CoursesService) {
+    this.store.dispatch(new LoadCourseAction({ id: this.courseId }))
 
-    }
+    this.dataSource = new LessonsDataSource(this.coursesService)
+    this.dataSource.loadLessons(this.courseId, 0, 3)
+  }
 
-    ngOnInit() {
+  ngOnDestroy(): void {
+    this.kill$.next()
+    this.kill$.complete()
+  }
 
-        this.course = this.route.snapshot.data["course"];
+  ngAfterViewInit() {
+    this.paginator.page.pipe(tap(() => this.loadLessonsPage())).subscribe()
+  }
 
-        this.dataSource = new LessonsDataSource(this.coursesService);
-
-        this.dataSource.loadLessons(this.course.id, 0, 3);
-
-    }
-
-    ngAfterViewInit() {
-
-        this.paginator.page
-        .pipe(
-            tap(() => this.loadLessonsPage())
-        )
-        .subscribe();
-
-    }
-
-    loadLessonsPage() {
-        this.dataSource.loadLessons(
-            this.course.id,
-            this.paginator.pageIndex,
-            this.paginator.pageSize);
-    }
-
-
+  loadLessonsPage() {
+    this.dataSource.loadLessons(this.courseId, this.paginator.pageIndex, this.paginator.pageSize)
+  }
 }

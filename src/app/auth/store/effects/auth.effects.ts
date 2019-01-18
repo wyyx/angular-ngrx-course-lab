@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { Action } from '@ngrx/store'
-import { Actions, Effect, ofType, ROOT_EFFECTS_INIT, OnInitEffects } from '@ngrx/effects'
-import { Observable, of, defer } from 'rxjs'
-import { catchError, map, mergeMap, tap } from 'rxjs/operators'
-import { AuthActionTypes, AuthActions, LoginAction, LogoutAction } from '../actions/auth.actions'
+import { Injectable } from '@angular/core'
 import { Router } from '@angular/router'
+import { Actions, Effect, ofType, OnInitEffects } from '@ngrx/effects'
+import { Action } from '@ngrx/store'
+import { Observable } from 'rxjs'
+import { tap } from 'rxjs/operators'
+import { AuthActionTypes, LoginAction, LogoutAction } from '../actions/auth.actions'
 
 @Injectable()
 export class AuthEffects implements OnInitEffects {
