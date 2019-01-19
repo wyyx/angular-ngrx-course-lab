@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core'
-import { Course } from '../model/course'
-import { Observable } from 'rxjs'
-import { map } from 'rxjs/operators'
-import { CoursesService } from '../services/courses.service'
 import { Store } from '@ngrx/store'
+import { Observable } from 'rxjs'
 import { AppState } from '../../store'
-import { getCourseList } from '../store/selectors/courses.selectors'
-import { LoadCourseListAction } from '../store/actions/courses.actions'
+import { Course } from '../model/course'
+import {
+  getAdvancedCourses,
+  getBeginnerCourses,
+  getPromoTotal
+} from '../store/selectors/courses.selectors'
+import { LoadAllCoursesAction } from '../store/actions/courses.actions'
 
 @Component({
   selector: 'home',
@@ -15,28 +17,16 @@ import { LoadCourseListAction } from '../store/actions/courses.actions'
 })
 export class HomeComponent implements OnInit {
   promoTotal$: Observable<number>
-
   beginnerCourses$: Observable<Course[]>
-
   advancedCourses$: Observable<Course[]>
 
-  constructor(private coursesService: CoursesService, private store: Store<AppState>) {}
+  constructor(private store: Store<AppState>) {}
 
   ngOnInit() {
-    // const courses$ = this.coursesService.findAllCourses()
-    const courses$ = this.store.select(getCourseList)
-    this.store.dispatch(new LoadCourseListAction())
+    this.store.dispatch(new LoadAllCoursesAction())
 
-    this.beginnerCourses$ = courses$.pipe(
-      map((courses) => courses.filter((course) => course.category === 'BEGINNER'))
-    )
-
-    this.advancedCourses$ = courses$.pipe(
-      map((courses) => courses.filter((course) => course.category === 'ADVANCED'))
-    )
-
-    this.promoTotal$ = courses$.pipe(
-      map((courses) => courses.filter((course) => course.promo).length)
-    )
+    this.beginnerCourses$ = this.store.select(getBeginnerCourses)
+    this.advancedCourses$ = this.store.select(getAdvancedCourses)
+    this.promoTotal$ = this.store.select(getPromoTotal)
   }
 }

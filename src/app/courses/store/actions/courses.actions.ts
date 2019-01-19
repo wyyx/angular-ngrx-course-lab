@@ -1,20 +1,22 @@
 import { Action } from '@ngrx/store'
 import { Course } from '../../model/course'
+import { Update } from '@ngrx/entity'
 
 export enum CoursesActionTypes {
   // course action types
   LOAD_COURSE = '[Courses] load course',
   LOAD_COURSE_SUCCESS = '[Courses] load course success',
   LOAD_COURSE_FAIL = '[Courses] load course fail',
-  COURSE_LOADED = '[Courses] course loaded',
+  UPDATE_COURSE = '[Courses] update course',
+  UPDATE_COURSE_SUCCESS = '[update] update course success',
+  UPDATE_COURSE_FAIL = '[update] update course fail',
   // courses action types
-  LOAD_COURSE_LIST = '[Courses] load course-list',
-  LOAD_COURSE_LIST_SUCCESS = '[Courses] load course-list success',
-  LOAD_COURSE_LIST_FAIL = '[Courses] load course-list fail',
-  COURSE_LIST_LOADED = '[Courses] course-list loaded'
+  LOAD_ALL_COURSES = '[Courses] load all-courses',
+  LOAD_ALL_COURSES_SUCCESS = '[Courses] load all-courses success',
+  LOAD_ALL_COURSES_FAIL = '[Courses] load all-courses fail'
 }
 
-// course actions
+// load course actions
 export class LoadCourseAction implements Action {
   readonly type = CoursesActionTypes.LOAD_COURSE
 
@@ -33,39 +35,48 @@ export class LoadCourseFailAction implements Action {
   constructor() {}
 }
 
-export class CourseLoadedAction implements Action {
-  readonly type = CoursesActionTypes.COURSE_LOADED
+// update course actions
+export class UpdateCourseAction implements Action {
+  readonly type = CoursesActionTypes.UPDATE_COURSE
+  constructor(public payload: Update<Course>) {}
+}
+
+export class UpdateCourseSuccessAction implements Action {
+  readonly type = CoursesActionTypes.UPDATE_COURSE_SUCCESS
+
+  constructor(public payload: Update<Course>) {}
+}
+
+export class UpdateCourseFailAction implements Action {
+  readonly type = CoursesActionTypes.UPDATE_COURSE_FAIL
 }
 
 // courses actions
-export class LoadCourseListAction implements Action {
-  readonly type = CoursesActionTypes.LOAD_COURSE_LIST
+export class LoadAllCoursesAction implements Action {
+  readonly type = CoursesActionTypes.LOAD_ALL_COURSES
 
   constructor() {}
 }
 
-export class LoadCourseListSuccessAction implements Action {
-  readonly type = CoursesActionTypes.LOAD_COURSE_LIST_SUCCESS
+export class LoadAllCoursesSuccessAction implements Action {
+  readonly type = CoursesActionTypes.LOAD_ALL_COURSES_SUCCESS
 
   constructor(public payload: Course[]) {}
 }
 
-export class LoadCourseListFailAction implements Action {
-  readonly type = CoursesActionTypes.LOAD_COURSE_LIST_FAIL
+export class LoadAllCoursesFailAction implements Action {
+  readonly type = CoursesActionTypes.LOAD_ALL_COURSES_FAIL
 
   constructor() {}
-}
-
-export class CourseListLoadedAction implements Action {
-  readonly type = CoursesActionTypes.COURSE_LIST_LOADED
 }
 
 export type CoursesActions =
   | LoadCourseAction
   | LoadCourseSuccessAction
   | LoadCourseFailAction
-  | CourseLoadedAction
-  | LoadCourseListAction
-  | LoadCourseListSuccessAction
-  | LoadCourseListFailAction
-  | CourseListLoadedAction
+  | LoadAllCoursesAction
+  | LoadAllCoursesSuccessAction
+  | LoadAllCoursesFailAction
+  | UpdateCourseAction
+  | UpdateCourseSuccessAction
+  | UpdateCourseFailAction

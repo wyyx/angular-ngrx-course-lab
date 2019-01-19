@@ -1,8 +1,8 @@
 <div class="course"
-     *ngIf="course">
-  <h2>{{course?.description}}</h2>
+     *ngIf="(course$ | async)">
+  <h2>{{(course$ | async).description}}</h2>
   <img class="course-thumbnail"
-       [src]="course?.iconUrl">
+       [src]="(course$ | async).iconUrl">
   <div class="spinner-container"
        *ngIf="dataSource.loading$ | async">
     <mat-spinner></mat-spinner>
@@ -29,7 +29,7 @@
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
     </mat-table>
-    <mat-paginator [length]="course?.lessonsCount"
+    <mat-paginator [length]="(course$ | async).lessonsCount"
                    [pageSize]="3"></mat-paginator>
   </div>
 </div>

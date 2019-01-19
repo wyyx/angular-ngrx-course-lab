@@ -1,22 +1,15 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, OnDestroy } from '@angular/core'
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core'
+import { MatPaginator } from '@angular/material'
 import { ActivatedRoute } from '@angular/router'
-import { MatPaginator, MatTableDataSource } from '@angular/material'
+import { Store } from '@ngrx/store'
+import { Subject, Observable } from 'rxjs'
+import { takeUntil, tap } from 'rxjs/operators'
+import { AppState } from '../../store'
 import { Course } from '../model/course'
 import { CoursesService } from '../services/courses.service'
-import {
-  debounceTime,
-  distinctUntilChanged,
-  startWith,
-  tap,
-  delay,
-  takeUntil
-} from 'rxjs/operators'
-import { merge, fromEvent, Observable, Subject } from 'rxjs'
 import { LessonsDataSource } from '../services/lessons.datasource'
-import { Store } from '@ngrx/store'
-import { AppState } from '../../store'
-import { getCourseById } from '../store/selectors/courses.selectors'
 import { LoadCourseAction } from '../store/actions/courses.actions'
+import { getCourseById } from '../store/selectors/courses.selectors'
 
 @Component({
   selector: 'course',
@@ -24,12 +17,10 @@ import { LoadCourseAction } from '../store/actions/courses.actions'
   styleUrls: ['./course.component.css']
 })
 export class CourseComponent implements OnInit, AfterViewInit, OnDestroy {
-  course: Course = null
+  course$: Observable<Course>
   dataSource: LessonsDataSource
   displayedColumns = ['seqNo', 'description', 'duration']
   courseId: number
-
-  kill$: Subject<any> = new Subject()
 
   @ViewChild(MatPaginator) paginator: MatPaginator
 
@@ -41,22 +32,14 @@ export class CourseComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     this.courseId = parseInt(this.route.snapshot.paramMap.get('id'))
-
-    this.store
-      .select(getCourseById(this.courseId))
-      .pipe(takeUntil(this.kill$))
-      .subscribe((course) => (this.course = course))
-
+    this.course$ = this.store.select(getCourseById(this.courseId))
     this.store.dispatch(new LoadCourseAction({ id: this.courseId }))
 
     this.dataSource = new LessonsDataSource(this.coursesService)
     this.dataSource.loadLessons(this.courseId, 0, 3)
   }
 
-  ngOnDestroy(): void {
-    this.kill$.next()
-    this.kill$.complete()
-  }
+  ngOnDestroy(): void {}
 
   ngAfterViewInit() {
     this.paginator.page.pipe(tap(() => this.loadLessonsPage())).subscribe()

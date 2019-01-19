@@ -17,25 +17,22 @@ const initialCoursesState = adapter.getInitialState({
 export function coursesReducer(state = initialCoursesState, action: CoursesActions): CoursesState {
   switch (action.type) {
     case CoursesActionTypes.LOAD_COURSE:
-      return { ...state, loading: true }
-      break
+      return { ...state }
     case CoursesActionTypes.LOAD_COURSE_SUCCESS:
-      const newState1 = adapter.addOne(action.payload, state)
-      return {
-        ...newState1,
-        loading: false,
-        loaded: true
-      }
-      break
-    case CoursesActionTypes.LOAD_COURSE_LIST:
+      return adapter.addOne(action.payload, state)
+    case CoursesActionTypes.LOAD_ALL_COURSES:
       return { ...state, loading: true }
-      break
-    case CoursesActionTypes.LOAD_COURSE_LIST_SUCCESS:
-      const newState2 = adapter.addAll(action.payload, state)
-      return { ...newState2, loading: false, loaded: true }
-      break
+    case CoursesActionTypes.LOAD_ALL_COURSES_SUCCESS:
+      return adapter.addAll(action.payload, { ...state, loading: false, loaded: true })
+    case CoursesActionTypes.LOAD_ALL_COURSES_FAIL:
+      return { ...state, loading: false, loaded: false }
+    case CoursesActionTypes.UPDATE_COURSE:
+      return state
+    case CoursesActionTypes.UPDATE_COURSE_SUCCESS:
+      return adapter.updateOne(action.payload, state)
+    case CoursesActionTypes.UPDATE_COURSE_FAIL:
+      return state
     default:
       return state
-      break
   }
 }
