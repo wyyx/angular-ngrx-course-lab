@@ -38,21 +38,21 @@ export class CoursesEffects {
     ofType(CoursesActionTypes.LOAD_COURSE),
     mergeMap((action: LoadCourseAction) =>
       this.store.select(getCourseIsLoaded(action.payload.id)).pipe(
-        filter((loaded) => !loaded),
+        filter(loaded => !loaded),
         mergeMapTo(this.coursesService.findCourseById(action.payload.id)),
-        map((course) => new LoadCourseSuccessAction(course))
+        map(course => new LoadCourseSuccessAction(course)),
+        catchError(() => of(new LoadCourseFailAction()))
       )
-    ),
-    catchError(() => of(new LoadCourseFailAction()))
+    )
   )
 
   @Effect()
   loadAllCourses$: Observable<CoursesActions> = this.actions$.pipe(
     ofType(CoursesActionTypes.LOAD_ALL_COURSES),
-    withLatestFrom(this.store.select(getAllCoursesIsLoaded)),
-    filter(([action, loaded]) => !loaded),
+    mergeMapTo(this.store.select(getAllCoursesIsLoaded)),
+    filter(loaded => !loaded),
     mergeMapTo(this.coursesService.findAllCourses()),
-    map((courses) => new LoadAllCoursesSuccessAction(courses)),
+    map(courses => new LoadAllCoursesSuccessAction(courses)),
     catchError(() => of(new LoadAllCoursesFailAction()))
   )
 
@@ -61,11 +61,11 @@ export class CoursesEffects {
     ofType(CoursesActionTypes.UPDATE_COURSE),
     map((action: UpdateCourseAction) => action.payload),
     mergeMap(({ id, changes }: UpdateNum<Course>) =>
-      this.coursesService
-        .saveCourse(id, changes)
-        .pipe(mapTo(new UpdateCourseSuccessAction({ id, changes })))
-    ),
-    catchError(() => of(new UpdateCourseFailAction()))
+      this.coursesService.saveCourse(id, changes).pipe(
+        mapTo(new UpdateCourseSuccessAction({ id, changes })),
+        catchError(() => of(new UpdateCourseFailAction()))
+      )
+    )
   )
 
   constructor(

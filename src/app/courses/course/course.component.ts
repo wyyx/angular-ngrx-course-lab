@@ -1,15 +1,23 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core'
-import { MatPaginator } from '@angular/material'
+import { FormControl } from '@angular/forms'
+import { MatPaginator, MatSort, PageEvent } from '@angular/material'
 import { ActivatedRoute } from '@angular/router'
-import { Store } from '@ngrx/store'
-import { Subject, Observable } from 'rxjs'
-import { takeUntil, tap } from 'rxjs/operators'
+import { select, Store } from '@ngrx/store'
+import { combineLatest, Subject, Observable } from 'rxjs'
+import {
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  mergeMap,
+  startWith,
+  takeUntil,
+  tap
+} from 'rxjs/operators'
 import { AppState } from '../../store'
 import { Course } from '../model/course'
-import { CoursesService } from '../services/courses.service'
 import { LessonsDataSource } from '../services/lessons.datasource'
-import { LoadCourseAction } from '../store/actions/courses.actions'
-import { getCourseById } from '../store/selectors/courses.selectors'
+import { LoadLessonsAction } from '../store/actions/lessons.action'
+import { getAllLessons } from '../store/selectors/lessons.selector'
 
 @Component({
   selector: 'course',
@@ -17,35 +25,67 @@ import { getCourseById } from '../store/selectors/courses.selectors'
   styleUrls: ['./course.component.css']
 })
 export class CourseComponent implements OnInit, AfterViewInit, OnDestroy {
-  course$: Observable<Course>
+  kill$: Subject<any> = new Subject()
+
+  course: Course
   dataSource: LessonsDataSource
   displayedColumns = ['seqNo', 'description', 'duration']
   courseId: number
+  filter = new FormControl('')
 
-  @ViewChild(MatPaginator) paginator: MatPaginator
+  @ViewChild('paginator') paginator: MatPaginator
+  @ViewChild(MatSort) sort: MatSort
 
-  constructor(
-    private route: ActivatedRoute,
-    private coursesService: CoursesService,
-    private store: Store<AppState>
-  ) {}
+  constructor(private route: ActivatedRoute, private store: Store<AppState>) {}
 
   ngOnInit() {
-    this.courseId = parseInt(this.route.snapshot.paramMap.get('id'))
-    this.course$ = this.store.select(getCourseById(this.courseId))
-    this.store.dispatch(new LoadCourseAction({ id: this.courseId }))
-
-    this.dataSource = new LessonsDataSource(this.coursesService)
-    this.dataSource.loadLessons(this.courseId, 0, 3)
+    this.course = this.route.snapshot.data['course']
+    this.courseId = this.course.id
+    this.store.dispatch(new LoadLessonsAction({ id: this.courseId }))
+    this.dataSource = new LessonsDataSource(this.store)
   }
-
-  ngOnDestroy(): void {}
 
   ngAfterViewInit() {
-    this.paginator.page.pipe(tap(() => this.loadLessonsPage())).subscribe()
+    // ReLoad lessons when one of these state changes
+    // 1. lessons state changes
+    // 2. page state changes
+    // 3. sort state changes
+    combineLatest(
+      this.store.pipe(select(getAllLessons(this.courseId))),
+      this.paginator.page.pipe(startWith({ pageIndex: 0, pageSize: 5 } as PageEvent)),
+      this.sort.sortChange.pipe(
+        startWith({ direction: 'asc' }),
+        map(sort => sort.direction),
+        // reset pageIndex to first page when sorting
+        tap(() => (this.paginator.pageIndex = 0))
+      ),
+      this.filter.valueChanges.pipe(
+        startWith(''),
+        debounceTime(200),
+        distinctUntilChanged(),
+        map((filter: string) => filter.toLowerCase()),
+        // reset pageIndex to first page when filtering
+        tap(() => (this.paginator.pageIndex = 0))
+      )
+    )
+      .pipe(
+        mergeMap(([lessons, page, direction, filter]) =>
+          this.dataSource.loadLessons(
+            this.courseId,
+            filter,
+            direction,
+            this.paginator.pageIndex,
+            this.paginator.pageSize,
+            this.course.lessonsCount
+          )
+        ),
+        takeUntil(this.kill$)
+      )
+      .subscribe()
   }
 
-  loadLessonsPage() {
-    this.dataSource.loadLessons(this.courseId, this.paginator.pageIndex, this.paginator.pageSize)
+  ngOnDestroy(): void {
+    this.kill$.next()
+    this.kill$.complete()
   }
 }

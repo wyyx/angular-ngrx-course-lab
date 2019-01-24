@@ -1,17 +1,27 @@
-<div class="course"
-     *ngIf="(course$ | async)">
-  <h2>{{(course$ | async).description}}</h2>
+<div class="course">
+  <h2>{{course.description}}</h2>
   <img class="course-thumbnail"
-       [src]="(course$ | async).iconUrl">
-  <div class="spinner-container"
-       *ngIf="dataSource.loading$ | async">
-    <mat-spinner></mat-spinner>
-  </div>
-  <div class="mat-elevation-z8">
+       [src]="course.iconUrl">
+
+  <div class="table-container mat-elevation-z8">
+    <mat-form-field class="filter-field">
+      <input [formControl]="filter"
+             matInput
+             placeholder="Filter lessons" />
+    </mat-form-field>
+    <div class="spinner-container"
+         *ngIf="dataSource.loading$ | async">
+      <mat-spinner></mat-spinner>
+    </div>
     <mat-table class="lessons-table"
+               matSort
+               [matSortDisableClear]="true"
                [dataSource]="dataSource">
+
       <ng-container matColumnDef="seqNo">
-        <mat-header-cell *matHeaderCellDef>#</mat-header-cell>
+        <mat-header-cell *matHeaderCellDef
+                         mat-sort-header
+                         start="desc">#</mat-header-cell>
         <mat-cell *matCellDef="let lesson">{{lesson.seqNo}}</mat-cell>
       </ng-container>
       <ng-container matColumnDef="description">
@@ -26,10 +36,14 @@
                   *matCellDef="let lesson">{{lesson.duration}}
         </mat-cell>
       </ng-container>
+
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
     </mat-table>
-    <mat-paginator [length]="(course$ | async).lessonsCount"
-                   [pageSize]="3"></mat-paginator>
+    <mat-paginator #paginator
+                   [pageSizeOptions]="[5, 10, 20]"
+                   [length]="dataSource.lessonsCount$ | async"
+                   [pageSize]="5"
+                   showFirstLastButtons></mat-paginator>
   </div>
 </div>
