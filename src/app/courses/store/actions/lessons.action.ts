@@ -11,11 +11,7 @@ export enum LessonsActionTypes {
   // load lessons of one course
   LOAD_LESSONS = '[Courses] load lessons',
   LOAD_LESSONS_SUCCESS = '[Courses] load lessons success',
-  LOAD_LESSONS_FAIL = '[Courses] load lessons fail',
-  // load lessons of all courses
-  LOAD_ALL_LESSONS = '[Courses] load all-lessons',
-  LOAD_ALL_LESSONS_SUCCESS = '[Courses] load all-lessons success',
-  LOAD_ALL_LESSONS_FAIL = '[Courses] load all-lessons fail'
+  LOAD_LESSONS_FAIL = '[Courses] load lessons fail'
 }
 
 export class LoadLessonsAction implements Action {

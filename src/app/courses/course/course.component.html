@@ -10,7 +10,7 @@
              placeholder="Filter lessons" />
     </mat-form-field>
     <div class="spinner-container"
-         *ngIf="dataSource.loading$ | async">
+         *ngIf="loading$ | async">
       <mat-spinner></mat-spinner>
     </div>
     <mat-table class="lessons-table"

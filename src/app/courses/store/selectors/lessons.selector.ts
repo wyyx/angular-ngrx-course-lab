@@ -31,6 +31,10 @@ export const getLessons = (
         )
         .slice(pageIndex * pageSize, pageIndex * pageSize + pageSize)
   )
+export const getLessonsIsLoading = createSelector(
+  getLessonsState,
+  state => state.loading
+)
 
 export const getLessonsIsLoaded = (courseId: number) =>
   createSelector(

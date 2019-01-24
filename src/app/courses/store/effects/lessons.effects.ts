@@ -21,10 +21,7 @@ export class LessonsEffects {
     ofType(LessonsActionTypes.LOAD_LESSONS),
     map((action: LoadLessonsAction) => action.payload.id),
     mergeMap(courseId =>
-      this.store.select(getLessonsIsLoaded(courseId)).pipe(
-        tap(v => console.log('loaded', v)),
-        filter(loaded => !loaded),
-        mergeMapTo(this.coursesService.findAllCourseLessons(courseId)),
+      this.coursesService.findAllCourseLessons(courseId).pipe(
         map(lessons => new LoadLessonsSuccessAction({ id: courseId, lessons })),
         catchError(() => of(new LoadLessonsFailAction()))
       )

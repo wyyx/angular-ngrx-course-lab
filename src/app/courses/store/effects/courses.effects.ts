@@ -1,45 +1,33 @@
 import { Injectable } from '@angular/core'
 import { Actions, Effect, ofType } from '@ngrx/effects'
+import { UpdateNum } from '@ngrx/entity/src/models'
 import { Store } from '@ngrx/store'
 import { Observable, of } from 'rxjs'
-import {
-  catchError,
-  map,
-  mergeMap,
-  tap,
-  filter,
-  mergeMapTo,
-  withLatestFrom,
-  mapTo
-} from 'rxjs/operators'
-import { CoursesService } from '../../services/courses.service'
+import { catchError, map, mapTo, mergeMap, mergeMapTo } from 'rxjs/operators'
 import { AppState } from '../../../store'
+import { Course } from '../../model/course'
+import { CoursesService } from '../../services/courses.service'
 import {
   CoursesActions,
   CoursesActionTypes,
-  LoadCourseAction,
-  LoadCourseSuccessAction,
-  LoadAllCoursesSuccessAction,
   LoadAllCoursesFailAction,
+  LoadAllCoursesSuccessAction,
+  LoadCourseAction,
   LoadCourseFailAction,
+  LoadCourseSuccessAction,
   UpdateCourseAction,
-  UpdateCourseSuccessAction,
-  UpdateCourseFailAction
+  UpdateCourseFailAction,
+  UpdateCourseSuccessAction
 } from '../actions/courses.actions'
-import { getCourseIsLoaded, getAllCoursesIsLoaded } from '../selectors/courses.selectors'
-import { Update } from '@ngrx/entity'
-import { Course } from '../../model/course'
-import { UpdateNum } from '@ngrx/entity/src/models'
 
 @Injectable()
 export class CoursesEffects {
   @Effect()
   loadCourse$: Observable<CoursesActions> = this.actions$.pipe(
     ofType(CoursesActionTypes.LOAD_COURSE),
-    mergeMap((action: LoadCourseAction) =>
-      this.store.select(getCourseIsLoaded(action.payload.id)).pipe(
-        filter(loaded => !loaded),
-        mergeMapTo(this.coursesService.findCourseById(action.payload.id)),
+    map((action: LoadCourseAction) => action.payload.id),
+    mergeMap(id =>
+      this.coursesService.findCourseById(id).pipe(
         map(course => new LoadCourseSuccessAction(course)),
         catchError(() => of(new LoadCourseFailAction()))
       )
@@ -49,8 +37,6 @@ export class CoursesEffects {
   @Effect()
   loadAllCourses$: Observable<CoursesActions> = this.actions$.pipe(
     ofType(CoursesActionTypes.LOAD_ALL_COURSES),
-    mergeMapTo(this.store.select(getAllCoursesIsLoaded)),
-    filter(loaded => !loaded),
     mergeMapTo(this.coursesService.findAllCourses()),
     map(courses => new LoadAllCoursesSuccessAction(courses)),
     catchError(() => of(new LoadAllCoursesFailAction()))

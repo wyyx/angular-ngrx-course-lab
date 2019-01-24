@@ -9,24 +9,22 @@ export interface LessonsContainer {
 
 export interface LessonsState extends EntityState<LessonsContainer> {
   loading: boolean
-  loaded: boolean
 }
 
 export const adapter: EntityAdapter<LessonsContainer> = createEntityAdapter<LessonsContainer>()
 
 const initialLessonsState = adapter.getInitialState({
-  loading: false,
-  loaded: false
+  loading: false
 })
 
 export function lessonsReducer(state = initialLessonsState, action: LessonsActions): LessonsState {
   switch (action.type) {
     case LessonsActionTypes.LOAD_LESSONS:
-      return state
+      return { ...state, loading: true }
     case LessonsActionTypes.LOAD_LESSONS_SUCCESS:
-      return adapter.addOne(action.payload, state)
+      return adapter.addOne(action.payload, { ...state, loading: false })
     case LessonsActionTypes.LOAD_LESSONS_FAIL:
-      return state
+      return { ...state, loading: false }
     default:
       return state
   }

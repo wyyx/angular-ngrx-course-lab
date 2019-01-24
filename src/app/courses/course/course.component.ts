@@ -17,7 +17,11 @@ import { AppState } from '../../store'
 import { Course } from '../model/course'
 import { LessonsDataSource } from '../services/lessons.datasource'
 import { LoadLessonsAction } from '../store/actions/lessons.action'
-import { getAllLessons } from '../store/selectors/lessons.selector'
+import {
+  getAllLessons,
+  getLessonsIsLoading,
+  getLessonsIsLoaded
+} from '../store/selectors/lessons.selector'
 
 @Component({
   selector: 'course',
@@ -26,6 +30,7 @@ import { getAllLessons } from '../store/selectors/lessons.selector'
 })
 export class CourseComponent implements OnInit, AfterViewInit, OnDestroy {
   kill$: Subject<any> = new Subject()
+  loading$: Observable<boolean>
 
   course: Course
   dataSource: LessonsDataSource
@@ -39,9 +44,19 @@ export class CourseComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(private route: ActivatedRoute, private store: Store<AppState>) {}
 
   ngOnInit() {
+    this.loading$ = this.store.pipe(select(getLessonsIsLoading))
     this.course = this.route.snapshot.data['course']
     this.courseId = this.course.id
-    this.store.dispatch(new LoadLessonsAction({ id: this.courseId }))
+
+    this.store
+      .pipe(
+        select(getLessonsIsLoaded(this.courseId)),
+        tap(v => console.log('>>>', 'loaded', v)),
+        tap(loaded => !loaded && this.store.dispatch(new LoadLessonsAction({ id: this.courseId }))),
+        takeUntil(this.kill$)
+      )
+      .subscribe()
+
     this.dataSource = new LessonsDataSource(this.store)
   }
 
@@ -50,6 +65,7 @@ export class CourseComponent implements OnInit, AfterViewInit, OnDestroy {
     // 1. lessons state changes
     // 2. page state changes
     // 3. sort state changes
+    // 4. filter string changes
     combineLatest(
       this.store.pipe(select(getAllLessons(this.courseId))),
       this.paginator.page.pipe(startWith({ pageIndex: 0, pageSize: 5 } as PageEvent)),
