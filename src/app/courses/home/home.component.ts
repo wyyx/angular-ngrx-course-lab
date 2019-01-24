@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core'
 import { Store } from '@ngrx/store'
 import { Observable, Subject } from 'rxjs'
 import { AppState } from '../../store'
@@ -13,7 +13,8 @@ import {
 @Component({
   selector: 'home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent implements OnInit, OnDestroy {
   kill$: Subject<any> = new Subject()

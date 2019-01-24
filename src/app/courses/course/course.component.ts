@@ -1,4 +1,11 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core'
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ChangeDetectionStrategy
+} from '@angular/core'
 import { FormControl } from '@angular/forms'
 import { MatPaginator, MatSort, PageEvent } from '@angular/material'
 import { ActivatedRoute } from '@angular/router'
@@ -22,7 +29,8 @@ import { getAllLessons, getLessonsIsLoading } from '../store/selectors/lessons.s
 @Component({
   selector: 'course',
   templateUrl: './course.component.html',
-  styleUrls: ['./course.component.css']
+  styleUrls: ['./course.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CourseComponent implements OnInit, AfterViewInit, OnDestroy {
   kill$: Subject<any> = new Subject()
