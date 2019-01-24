@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core'
 import { Actions, Effect, ofType } from '@ngrx/effects'
 import { UpdateNum } from '@ngrx/entity/src/models'
-import { Store } from '@ngrx/store'
+import { Store, select } from '@ngrx/store'
 import { Observable, of } from 'rxjs'
-import { catchError, map, mapTo, mergeMap, mergeMapTo } from 'rxjs/operators'
+import { catchError, map, mapTo, mergeMap, mergeMapTo, filter, tap } from 'rxjs/operators'
 import { AppState } from '../../../store'
 import { Course } from '../../model/course'
 import { CoursesService } from '../../services/courses.service'
@@ -17,11 +17,26 @@ import {
   LoadCourseSuccessAction,
   UpdateCourseAction,
   UpdateCourseFailAction,
-  UpdateCourseSuccessAction
+  UpdateCourseSuccessAction,
+  NeedOneCourseAction,
+  LoadAllCoursesAction
 } from '../actions/courses.actions'
+import { getCourseIsLoaded, getAllCoursesIsLoaded } from '../selectors/courses.selectors'
 
 @Injectable()
 export class CoursesEffects {
+  @Effect()
+  needCourse$: Observable<CoursesActions> = this.actions$.pipe(
+    ofType(CoursesActionTypes.NEED_COURSE),
+    map((action: NeedOneCourseAction) => action.payload.id),
+    mergeMap(id =>
+      this.store.pipe(select(getCourseIsLoaded(id))).pipe(
+        filter(loaded => !loaded),
+        mapTo(new LoadCourseAction({ id }))
+      )
+    )
+  )
+
   @Effect()
   loadCourse$: Observable<CoursesActions> = this.actions$.pipe(
     ofType(CoursesActionTypes.LOAD_COURSE),
@@ -35,8 +50,17 @@ export class CoursesEffects {
   )
 
   @Effect()
+  needAllCourses$: Observable<CoursesActions> = this.actions$.pipe(
+    ofType(CoursesActionTypes.NEED_ALL_COURSES),
+    mergeMapTo(this.store.pipe(select(getAllCoursesIsLoaded))),
+    filter(loaded => !loaded),
+    mapTo(new LoadAllCoursesAction())
+  )
+
+  @Effect()
   loadAllCourses$: Observable<CoursesActions> = this.actions$.pipe(
     ofType(CoursesActionTypes.LOAD_ALL_COURSES),
+    mergeMapTo(this.store.pipe(select(getAllCoursesIsLoaded))),
     mergeMapTo(this.coursesService.findAllCourses()),
     map(courses => new LoadAllCoursesSuccessAction(courses)),
     catchError(() => of(new LoadAllCoursesFailAction()))

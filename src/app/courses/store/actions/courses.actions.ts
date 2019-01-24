@@ -4,6 +4,7 @@ import { Update } from '@ngrx/entity'
 
 export enum CoursesActionTypes {
   // course action types
+  NEED_COURSE = '[Courses] need one course',
   LOAD_COURSE = '[Courses] load course',
   LOAD_COURSE_SUCCESS = '[Courses] load course success',
   LOAD_COURSE_FAIL = '[Courses] load course fail',
@@ -11,12 +12,19 @@ export enum CoursesActionTypes {
   UPDATE_COURSE_SUCCESS = '[update] update course success',
   UPDATE_COURSE_FAIL = '[update] update course fail',
   // courses action types
+  NEED_ALL_COURSES = '[Courses] need all-courses',
   LOAD_ALL_COURSES = '[Courses] load all-courses',
   LOAD_ALL_COURSES_SUCCESS = '[Courses] load all-courses success',
   LOAD_ALL_COURSES_FAIL = '[Courses] load all-courses fail'
 }
 
 // load course actions
+export class NeedOneCourseAction implements Action {
+  readonly type = CoursesActionTypes.NEED_COURSE
+
+  constructor(public payload: { id: number }) {}
+}
+
 export class LoadCourseAction implements Action {
   readonly type = CoursesActionTypes.LOAD_COURSE
 
@@ -52,6 +60,12 @@ export class UpdateCourseFailAction implements Action {
 }
 
 // courses actions
+export class NeedAllCoursesAction implements Action {
+  readonly type = CoursesActionTypes.NEED_ALL_COURSES
+
+  constructor() {}
+}
+
 export class LoadAllCoursesAction implements Action {
   readonly type = CoursesActionTypes.LOAD_ALL_COURSES
 
@@ -71,6 +85,7 @@ export class LoadAllCoursesFailAction implements Action {
 }
 
 export type CoursesActions =
+  | NeedOneCourseAction
   | LoadCourseAction
   | LoadCourseSuccessAction
   | LoadCourseFailAction
@@ -80,3 +95,4 @@ export type CoursesActions =
   | UpdateCourseAction
   | UpdateCourseSuccessAction
   | UpdateCourseFailAction
+  | NeedAllCoursesAction

@@ -9,9 +9,16 @@ export interface PageQuery {
 
 export enum LessonsActionTypes {
   // load lessons of one course
+  NEED_LESSONS = '[Course] need lessons',
   LOAD_LESSONS = '[Courses] load lessons',
   LOAD_LESSONS_SUCCESS = '[Courses] load lessons success',
   LOAD_LESSONS_FAIL = '[Courses] load lessons fail'
+}
+
+export class NeedLessonsAction implements Action {
+  readonly type = LessonsActionTypes.NEED_LESSONS
+
+  constructor(public payload: { id: number }) {}
 }
 
 export class LoadLessonsAction implements Action {
@@ -32,4 +39,8 @@ export class LoadLessonsFailAction implements Action {
   constructor() {}
 }
 
-export type LessonsActions = LoadLessonsAction | LoadLessonsSuccessAction | LoadLessonsFailAction
+export type LessonsActions =
+  | LoadLessonsAction
+  | LoadLessonsSuccessAction
+  | LoadLessonsFailAction
+  | NeedLessonsAction

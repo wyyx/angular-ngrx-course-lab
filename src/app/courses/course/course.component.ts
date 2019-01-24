@@ -3,7 +3,7 @@ import { FormControl } from '@angular/forms'
 import { MatPaginator, MatSort, PageEvent } from '@angular/material'
 import { ActivatedRoute } from '@angular/router'
 import { select, Store } from '@ngrx/store'
-import { combineLatest, Subject, Observable } from 'rxjs'
+import { combineLatest, Observable, Subject } from 'rxjs'
 import {
   debounceTime,
   distinctUntilChanged,
@@ -16,12 +16,8 @@ import {
 import { AppState } from '../../store'
 import { Course } from '../model/course'
 import { LessonsDataSource } from '../services/lessons.datasource'
-import { LoadLessonsAction } from '../store/actions/lessons.action'
-import {
-  getAllLessons,
-  getLessonsIsLoading,
-  getLessonsIsLoaded
-} from '../store/selectors/lessons.selector'
+import { NeedLessonsAction } from '../store/actions/lessons.action'
+import { getAllLessons, getLessonsIsLoading } from '../store/selectors/lessons.selector'
 
 @Component({
   selector: 'course',
@@ -48,15 +44,7 @@ export class CourseComponent implements OnInit, AfterViewInit, OnDestroy {
     this.course = this.route.snapshot.data['course']
     this.courseId = this.course.id
 
-    this.store
-      .pipe(
-        select(getLessonsIsLoaded(this.courseId)),
-        tap(v => console.log('>>>', 'loaded', v)),
-        tap(loaded => !loaded && this.store.dispatch(new LoadLessonsAction({ id: this.courseId }))),
-        takeUntil(this.kill$)
-      )
-      .subscribe()
-
+    this.store.dispatch(new NeedLessonsAction({ id: this.courseId }))
     this.dataSource = new LessonsDataSource(this.store)
   }
 

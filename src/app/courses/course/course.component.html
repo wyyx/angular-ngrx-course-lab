@@ -2,13 +2,12 @@
   <h2>{{course.description}}</h2>
   <img class="course-thumbnail"
        [src]="course.iconUrl">
-
+  <mat-form-field class="filter-field">
+    <input [formControl]="filter"
+           matInput
+           placeholder="Filter lessons" />
+  </mat-form-field>
   <div class="table-container mat-elevation-z8">
-    <mat-form-field class="filter-field">
-      <input [formControl]="filter"
-             matInput
-             placeholder="Filter lessons" />
-    </mat-form-field>
     <div class="spinner-container"
          *ngIf="loading$ | async">
       <mat-spinner></mat-spinner>

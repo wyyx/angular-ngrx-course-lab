@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core'
 import { Actions, Effect, ofType } from '@ngrx/effects'
-import { Store } from '@ngrx/store'
+import { Store, select } from '@ngrx/store'
 import { Observable, of } from 'rxjs'
-import { catchError, filter, map, mergeMap, mergeMapTo, tap } from 'rxjs/operators'
+import { catchError, filter, map, mergeMap, mergeMapTo, tap, mapTo } from 'rxjs/operators'
 import { AppState } from '../../../store'
 import { CoursesService } from '../../services/courses.service'
 import {
@@ -10,12 +10,26 @@ import {
   LessonsActionTypes,
   LoadLessonsFailAction,
   LoadLessonsSuccessAction,
-  LoadLessonsAction
+  LoadLessonsAction,
+  NeedLessonsAction
 } from '../actions/lessons.action'
 import { getLessonsIsLoaded } from '../selectors/lessons.selector'
 
 @Injectable()
 export class LessonsEffects {
+  @Effect()
+  needLessons$: Observable<LessonsActions> = this.actions$.pipe(
+    ofType(LessonsActionTypes.NEED_LESSONS),
+    map((action: NeedLessonsAction) => action.payload.id),
+    mergeMap(courseId =>
+      this.store.pipe(
+        select(getLessonsIsLoaded(courseId)),
+        filter(loaded => !loaded),
+        mapTo(new LoadLessonsAction({ id: courseId }))
+      )
+    )
+  )
+
   @Effect()
   loadLessons$: Observable<LessonsActions> = this.actions$.pipe(
     ofType(LessonsActionTypes.LOAD_LESSONS),

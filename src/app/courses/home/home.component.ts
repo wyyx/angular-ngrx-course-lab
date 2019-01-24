@@ -1,16 +1,14 @@
-import { Component, OnInit, OnDestroy } from '@angular/core'
-import { Store, select } from '@ngrx/store'
+import { Component, OnDestroy, OnInit } from '@angular/core'
+import { Store } from '@ngrx/store'
 import { Observable, Subject } from 'rxjs'
 import { AppState } from '../../store'
 import { Course } from '../model/course'
+import { NeedAllCoursesAction } from '../store/actions/courses.actions'
 import {
   getAdvancedCourses,
   getBeginnerCourses,
-  getPromoTotal,
-  getAllCoursesIsLoaded
+  getPromoTotal
 } from '../store/selectors/courses.selectors'
-import { LoadAllCoursesAction } from '../store/actions/courses.actions'
-import { tap, takeUntil } from 'rxjs/operators'
 
 @Component({
   selector: 'home',
@@ -27,14 +25,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(private store: Store<AppState>) {}
 
   ngOnInit() {
-    this.store
-      .pipe(
-        select(getAllCoursesIsLoaded),
-        tap(loaded => !loaded && this.store.dispatch(new LoadAllCoursesAction())),
-        takeUntil(this.kill$)
-      )
-      .subscribe()
-
+    this.store.dispatch(new NeedAllCoursesAction())
     this.beginnerCourses$ = this.store.select(getBeginnerCourses)
     this.advancedCourses$ = this.store.select(getAdvancedCourses)
     this.promoTotal$ = this.store.select(getPromoTotal)
