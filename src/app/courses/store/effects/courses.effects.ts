@@ -61,9 +61,12 @@ export class CoursesEffects {
   loadAllCourses$: Observable<CoursesActions> = this.actions$.pipe(
     ofType(CoursesActionTypes.LOAD_ALL_COURSES),
     mergeMapTo(this.store.pipe(select(getAllCoursesIsLoaded))),
-    mergeMapTo(this.coursesService.findAllCourses()),
-    map(courses => new LoadAllCoursesSuccessAction(courses)),
-    catchError(() => of(new LoadAllCoursesFailAction()))
+    mergeMapTo(
+      this.coursesService.findAllCourses().pipe(
+        map(courses => new LoadAllCoursesSuccessAction(courses)),
+        catchError(() => of(new LoadAllCoursesFailAction()))
+      )
+    )
   )
 
   @Effect()

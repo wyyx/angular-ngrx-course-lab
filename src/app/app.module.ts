@@ -6,7 +6,12 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { MatMenuModule } from '@angular/material/menu'
 import { MatIconModule } from '@angular/material/icon'
 
-import { MatListModule, MatSidenavModule, MatToolbarModule } from '@angular/material'
+import {
+  MatListModule,
+  MatSidenavModule,
+  MatToolbarModule,
+  MatButtonModule
+} from '@angular/material'
 import { HttpClientModule } from '@angular/common/http'
 
 import { RouterModule, Routes } from '@angular/router'
@@ -45,6 +50,7 @@ const routes: Routes = [
     MatSidenavModule,
     MatListModule,
     MatToolbarModule,
+    MatButtonModule,
     StoreModule.forRoot(reducers, { metaReducers }),
     !environment.production ? StoreDevtoolsModule.instrument() : [],
     StoreRouterConnectingModule.forRoot({ stateKey: 'router', serializer: CustomSerializer }),

@@ -5,6 +5,13 @@ import { setTimeout } from 'timers'
 export function searchLessons(req: Request, res: Response) {
   console.log('Searching for lessons ...')
 
+  // // Simulate error
+  // const error = Math.random() >= 0.5
+  // if (error) {
+  //   console.log('ERROR loading lessons!')
+  //   return res.status(500).json({ message: 'random error occurred.' })
+  // }
+
   const queryParams = req.query
 
   const courseId = queryParams.courseId,
@@ -14,12 +21,12 @@ export function searchLessons(req: Request, res: Response) {
     pageSize = parseInt(queryParams.pageSize)
 
   let lessons = Object.values(LESSONS)
-    .filter((lesson) => lesson.courseId == courseId)
+    .filter(lesson => lesson.courseId == courseId)
     .sort((l1, l2) => l1.id - l2.id)
 
   if (filter) {
     lessons = lessons.filter(
-      (lesson) =>
+      lesson =>
         lesson.description
           .trim()
           .toLowerCase()
