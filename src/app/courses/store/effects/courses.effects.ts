@@ -32,19 +32,13 @@ export class CoursesEffects {
     mergeMap(id =>
       this.store.pipe(select(getCourseIsLoaded(id))).pipe(
         filter(loaded => !loaded),
-        mapTo(new LoadCourseAction({ id }))
-      )
-    )
-  )
-
-  @Effect()
-  loadCourse$: Observable<CoursesActions> = this.actions$.pipe(
-    ofType(CoursesActionTypes.LOAD_COURSE),
-    map((action: LoadCourseAction) => action.payload.id),
-    mergeMap(id =>
-      this.coursesService.findCourseById(id).pipe(
-        map(course => new LoadCourseSuccessAction(course)),
-        catchError(() => of(new LoadCourseFailAction()))
+        tap(() => this.store.dispatch(new LoadCourseAction({ id }))),
+        mergeMapTo(
+          this.coursesService.findCourseById(id).pipe(
+            map(course => new LoadCourseSuccessAction(course)),
+            catchError(() => of(new LoadCourseFailAction()))
+          )
+        )
       )
     )
   )
@@ -54,13 +48,7 @@ export class CoursesEffects {
     ofType(CoursesActionTypes.NEED_ALL_COURSES),
     mergeMapTo(this.store.pipe(select(getAllCoursesIsLoaded))),
     filter(loaded => !loaded),
-    mapTo(new LoadAllCoursesAction())
-  )
-
-  @Effect()
-  loadAllCourses$: Observable<CoursesActions> = this.actions$.pipe(
-    ofType(CoursesActionTypes.LOAD_ALL_COURSES),
-    mergeMapTo(this.store.pipe(select(getAllCoursesIsLoaded))),
+    tap(() => this.store.dispatch(new LoadAllCoursesAction())),
     mergeMapTo(
       this.coursesService.findAllCourses().pipe(
         map(courses => new LoadAllCoursesSuccessAction(courses)),
