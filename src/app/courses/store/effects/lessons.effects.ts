@@ -28,7 +28,7 @@ export class LessonsEffects {
         tap(() => this.store.dispatch(new LoadLessonsAction({ id: courseId }))),
         mergeMapTo(
           this.coursesService.findAllCourseLessons(courseId).pipe(
-            map(lessons => new LoadLessonsSuccessAction({ id: courseId, lessons })),
+            map(lessons => new LoadLessonsSuccessAction({ courseId: courseId, lessons })),
             catchError(() => of(new LoadLessonsFailAction()))
           )
         )

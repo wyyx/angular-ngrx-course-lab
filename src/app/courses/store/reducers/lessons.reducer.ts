@@ -3,7 +3,7 @@ import { Lesson } from '../../model/lesson'
 import { LessonsActions, LessonsActionTypes } from '../actions/lessons.action'
 
 export interface LessonsContainer {
-  id: number
+  courseId: number
   lessons: Lesson[]
 }
 
@@ -11,7 +11,9 @@ export interface LessonsState extends EntityState<LessonsContainer> {
   loading: boolean
 }
 
-export const adapter: EntityAdapter<LessonsContainer> = createEntityAdapter<LessonsContainer>()
+export const adapter: EntityAdapter<LessonsContainer> = createEntityAdapter<LessonsContainer>({
+  selectId: (lessonsContainer: LessonsContainer) => lessonsContainer.courseId
+})
 
 const initialLessonsState = adapter.getInitialState({
   loading: false
