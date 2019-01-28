@@ -6,16 +6,17 @@ import { map, tap } from 'rxjs/operators'
 import { AppState } from '../../store'
 import { Lesson } from '../model/lesson'
 import { getLessons } from '../store/selectors/lessons.selector'
+import { MatPaginator } from '@angular/material'
 
 export class LessonsDataSource extends DataSource<Lesson> {
   private lessonsSubject$ = new BehaviorSubject<Lesson[]>([])
-  private lessonsCountSubject$ = new BehaviorSubject<number>(0)
-  lessonsCount$: Observable<number> = this.lessonsCountSubject$.asObservable()
+  paginator: MatPaginator
 
   constructor(private store: Store<AppState>) {
     super()
   }
 
+  // Reload data
   loadLessons(
     courseId: number,
     filterStr?: string,
@@ -32,8 +33,8 @@ export class LessonsDataSource extends DataSource<Lesson> {
       // if no filterStr, use total count, otherwise use filtering count
       tap(lessons =>
         filterStr
-          ? this.lessonsCountSubject$.next(lessons.length)
-          : this.lessonsCountSubject$.next(totalLessons)
+          ? (this.paginator.length = lessons.length)
+          : (this.paginator.length = totalLessons)
       )
     )
   }
@@ -44,6 +45,5 @@ export class LessonsDataSource extends DataSource<Lesson> {
 
   disconnect(collectionViewer: CollectionViewer): void {
     this.lessonsSubject$.complete()
-    this.lessonsCountSubject$.complete()
   }
 }

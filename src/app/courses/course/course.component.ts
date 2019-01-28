@@ -57,6 +57,9 @@ export class CourseComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    // Add paginator to dataSource
+    this.dataSource.paginator = this.paginator
+
     // ReLoad lessons when one of these state changes
     // 1. lessons state changes
     // 2. page state changes
